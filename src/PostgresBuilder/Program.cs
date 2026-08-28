@@ -1,18 +1,22 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CompleteNatGeo.PostgresBuilder;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
 
 var configuration = new ConfigurationBuilder()
-    .SetBasePath(AppContext.BaseDirectory)
-    .AddJsonFile("appsettings.local.json", optional: false)
-    .Build();
+	.SetBasePath(AppContext.BaseDirectory)
+	.AddJsonFile("appsettings.local.json", optional: false)
+	.Build();
 
-var settings = configuration.GetRequiredSection("Inputs").Get<InputsConfig>()
-    ?? throw new InvalidOperationException("The Inputs configuration section is required.");
+var settings =
+	configuration.GetRequiredSection("Inputs").Get<InputsConfig>()
+	?? throw new InvalidOperationException("The Inputs configuration section is required.");
 
-Console.WriteLine(settings.SqlitePath);
-Console.WriteLine(settings.ImagesPath);
+Console.WriteLine("SQLite path: " + settings.SqlitePath);
+Console.WriteLine("Images path: " + settings.ImagesPath);
 
-public sealed class InputsConfig
-{
-    public required string SqlitePath { get; init; }
-    public required string ImagesPath { get; init; }
-}
+await using var connection = new SqliteConnection(settings.SqliteConnectionString);
+connection.Open();
+
+await DatabaseConverter.ConvertAsync(connection, settings.ImagesPath);
+
+Console.WriteLine("Connected to SQLite database.");
