@@ -5,6 +5,7 @@
 	</Folder>
 	<Folder Name="/src/">
 		<Project Path="src/CngConverter/CngConverter.csproj" />
+		<Project Path="src/PostgresBuilder.Tests/PostgresBuilder.Tests.csproj" />
 		<Project Path="src/PostgresBuilder/PostgresBuilder.csproj" />
 	</Folder>
 </Solution>
