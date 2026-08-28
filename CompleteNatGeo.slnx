@@ -1,5 +1,9 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/CngConverter/CngConverter.csproj" />
-  </Folder>
+	<Folder Name="/ExternalItems/">
+		<File Path="Directory.Packages.props" />
+		<File Path="dotnet-tools.json" />
+	</Folder>
+	<Folder Name="/src/">
+		<Project Path="src/CngConverter/CngConverter.csproj" />
+	</Folder>
 </Solution>
