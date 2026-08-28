@@ -432,3 +432,9 @@ FodyWeavers.xsd
 # CUSTOMIZATIONS #
 ##################
 .idea/
+
+artifacts/*
+!artifacts/
+!artifacts/readme.md
+
+src/PostgresBuilder/appsettings.local.json
