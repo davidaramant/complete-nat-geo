@@ -8,7 +8,7 @@ Option<DirectoryInfo> cngOption = new("--cng-path")
 };
 Option<DirectoryInfo> outputOption = new("--output-path") { Description = "The output directory" };
 
-RootCommand rootCommand = new("Sample app for System.CommandLine");
+RootCommand rootCommand = new("CNG to JPG converter");
 rootCommand.Options.Add(cngOption);
 rootCommand.Options.Add(outputOption);
 
