@@ -1,0 +1,9 @@
+<Solution>
+	<Folder Name="/ExternalItems/">
+		<File Path="Directory.Packages.props" />
+		<File Path="../dotnet-tools.json" />
+	</Folder>
+	<Project Path="CngConverter/CngConverter.csproj" />
+	<Project Path="PostgresBuilder.Tests/PostgresBuilder.Tests.csproj" />
+	<Project Path="PostgresBuilder/PostgresBuilder.csproj" />
+</Solution>
