@@ -1,3 +1,10 @@
 namespace CompleteNatGeo.PostgresBuilder.LegacyModels;
 
-public sealed record ArticleSubject(int Id, string DisplayName, int SearchTime, int StartPageOffset, int ArticleId);
+public sealed record ArticleSubject
+{
+	public required int Id { get; init; }
+	public required string DisplayName { get; init; }
+	public required int SearchTime { get; init; }
+	public required int StartPageOffset { get; init; }
+	public required int ArticleId { get; init; }
+}

@@ -1,3 +1,9 @@
 namespace CompleteNatGeo.PostgresBuilder.LegacyModels;
 
-public sealed record TriviaRanking(int Id, string DisplayName, int MinValue, int MaxValue);
+public sealed record TriviaRanking
+{
+	public required int Id { get; init; }
+	public required string DisplayName { get; init; }
+	public required int MinValue { get; init; }
+	public required int MaxValue { get; init; }
+}

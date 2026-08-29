@@ -1,9 +1,10 @@
 namespace CompleteNatGeo.PostgresBuilder.LegacyModels;
 
-public sealed record DepartmentSubject(
-	int Id,
-	string DisplayName,
-	int SearchTime,
-	int StartPageOffset,
-	int DepartmentId
-);
+public sealed record DepartmentSubject
+{
+	public required int Id { get; init; }
+	public required string DisplayName { get; init; }
+	public required int SearchTime { get; init; }
+	public required int StartPageOffset { get; init; }
+	public required int DepartmentId { get; init; }
+}
