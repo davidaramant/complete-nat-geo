@@ -28,6 +28,8 @@ var action = argument switch
 };
 Console.WriteLine(action);
 
+Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
 await using var connection = new SqliteConnection(settings.SqliteConnectionString);
 connection.Open();
 

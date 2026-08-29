@@ -1,4 +1,6 @@
-﻿using CompleteNatGeo.PostgresBuilder.LegacyModels;
+﻿using System.Text.Json;
+using CompleteNatGeo.PostgresBuilder.LegacyModels;
+using CompleteNatGeo.PostgresBuilder.LegacyModels.PageExceptionsModel;
 using Dapper;
 using Microsoft.Data.Sqlite;
 
@@ -77,6 +79,45 @@ public static class DatabaseConverter
 		var triviaRankings = (await connection.QueryAsync<TriviaRanking>("SELECT * FROM trivia_rankings")).ToList();
 
 		await Console.Out.WriteLineAsync($"TriviaRanking count: {triviaRankings.Count:N0}");
+
+		// Try deserializing all of the page exceptions
+		foreach (var issue in issues)
+		{
+			string json;
+			try
+			{
+				json = JsonPrettify(issue.PageExceptionsAsJson);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
+			}
+
+			try
+			{
+				var exceptions = PageExceptions.Deserialize(json);
+				foreach (var correction in exceptions.Corrections)
+				{
+					var operation = correction.GetOperation();
+				}
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("FAILED on issue: " + issue.Id);
+				Console.WriteLine();
+				Console.WriteLine(json);
+				Console.WriteLine();
+				Console.WriteLine(e);
+				throw;
+			}
+		}
+
+		static string JsonPrettify(string json)
+		{
+			using var jDoc = JsonDocument.Parse(json);
+			return JsonSerializer.Serialize(jDoc, new JsonSerializerOptions { WriteIndented = true });
+		}
 	}
 
 	public static async Task ConvertPagesAsync(SqliteConnection connection, string imagesPath)
