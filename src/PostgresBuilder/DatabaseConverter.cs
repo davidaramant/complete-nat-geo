@@ -80,7 +80,10 @@ public static class DatabaseConverter
 
 		await Console.Out.WriteLineAsync($"TriviaRanking count: {triviaRankings.Count:N0}");
 
-		// Try deserializing all of the page exceptions
+		await Console.Out.WriteLineAsync();
+		await Console.Out.WriteLineAsync("Try deserializing all of the page exceptions...");
+		var pageCorrectionAdjustments = new HashSet<string>();
+		var seenOperations = Enum.GetValues<CorrectionOperation>().ToDictionary(o => o, _ => false);
 		foreach (var issue in issues)
 		{
 			string json;
@@ -100,6 +103,12 @@ public static class DatabaseConverter
 				foreach (var correction in exceptions.Corrections)
 				{
 					var operation = correction.GetOperation();
+					seenOperations[operation] = true;
+
+					if (correction.Adjust is not null)
+					{
+						pageCorrectionAdjustments.Add(correction.Adjust);
+					}
 				}
 			}
 			catch (Exception e)
@@ -112,6 +121,22 @@ public static class DatabaseConverter
 				throw;
 			}
 		}
+
+		await Console.Out.WriteLineAsync();
+		await Console.Out.WriteLineAsync("Page correction adjustments:");
+		foreach (var adjust in pageCorrectionAdjustments)
+		{
+			await Console.Out.WriteLineAsync(" * " + adjust);
+		}
+		await Console.Out.WriteLineAsync();
+		await Console.Out.WriteLineAsync("Unused operations:");
+		foreach (var operation in seenOperations.Where(kvp => !kvp.Value).Select(kvp => kvp.Key))
+		{
+			await Console.Out.WriteLineAsync(" * " + operation);
+		}
+		await Console.Out.WriteLineAsync();
+
+		return;
 
 		static string JsonPrettify(string json)
 		{
