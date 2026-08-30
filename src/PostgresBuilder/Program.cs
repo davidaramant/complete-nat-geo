@@ -35,7 +35,7 @@ connection.Open();
 
 if (argument == Argument.VerifyMappings)
 {
-	await DatabaseConverter.VerifyMappingsAsync(connection);
+	await LegacySchemaVerification.VerifyMappingsAsync(connection);
 	return 0;
 }
 
