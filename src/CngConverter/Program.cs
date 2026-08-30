@@ -19,7 +19,7 @@ if (
 	&& parseResult.GetValue(outputOption) is { } outputPath
 )
 {
-	ConvertCngs(inputPath, outputPath);
+	await ConvertCngsAsync(inputPath, outputPath);
 	return 0;
 }
 foreach (ParseError parseError in parseResult.Errors)
@@ -29,7 +29,7 @@ foreach (ParseError parseError in parseResult.Errors)
 
 return 1;
 
-static void ConvertCngs(DirectoryInfo inputPath, DirectoryInfo outputPath)
+static Task ConvertCngsAsync(DirectoryInfo inputPath, DirectoryInfo outputPath)
 {
 	if (outputPath.Exists)
 	{
@@ -44,9 +44,9 @@ static void ConvertCngs(DirectoryInfo inputPath, DirectoryInfo outputPath)
 	var options = new ProgressBarOptions { DisplayTimeInRealTime = false };
 	using var progress = new ProgressBar(totalCngs, "Converting CNG files...", options);
 
-	Parallel.ForEach(
+	return Parallel.ForEachAsync(
 		decades,
-		decadePath =>
+		async (decadePath, ct) =>
 		{
 			const int bufferSize = 64 * 1024;
 			var buffer = new byte[bufferSize];
@@ -58,7 +58,7 @@ static void ConvertCngs(DirectoryInfo inputPath, DirectoryInfo outputPath)
 
 				foreach (var pagePath in Directory.GetFiles(issuePath, "*.cng"))
 				{
-					using var input = new FileStream(
+					await using var input = new FileStream(
 						pagePath,
 						FileMode.Open,
 						FileAccess.Read,
@@ -66,7 +66,7 @@ static void ConvertCngs(DirectoryInfo inputPath, DirectoryInfo outputPath)
 						bufferSize,
 						FileOptions.SequentialScan
 					);
-					using var output = File.Create(
+					await using var output = File.Create(
 						Path.Combine(
 							outputPath.FullName,
 							relativePath,
@@ -75,14 +75,14 @@ static void ConvertCngs(DirectoryInfo inputPath, DirectoryInfo outputPath)
 					);
 
 					int bytesRead;
-					while ((bytesRead = input.Read(buffer, 0, buffer.Length)) > 0)
+					while ((bytesRead = await input.ReadAsync(buffer, 0, buffer.Length)) > 0)
 					{
 						for (var index = 0; index < bytesRead; index++)
 						{
 							buffer[index] ^= 0xEF;
 						}
 
-						output.Write(buffer, 0, bytesRead);
+						await output.WriteAsync(buffer, 0, bytesRead);
 					}
 
 					progress.Tick();
