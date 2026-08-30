@@ -10,13 +10,7 @@
 	<ItemGroup>
 		<PackageReference Include="Dapper" />
 		<PackageReference Include="Microsoft.Data.Sqlite" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" />
 		<PackageReference Include="ShellProgressBar" />
 		<PackageReference Include="System.CommandLine" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="appsettings.local.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

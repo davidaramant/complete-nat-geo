@@ -437,4 +437,4 @@ artifacts/*
 !artifacts/
 !artifacts/readme.md
 
-src/PostgresBuilder/appsettings.local.json
+!template.env
