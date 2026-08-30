@@ -27,4 +27,6 @@ public static class RepoPath
 
 	public static string Source => Path.Combine(Root, "src");
 	public static string Solution => Path.Combine(Source, "CompleteNatGeo.slnx");
+
+	public static string PostgresBuilderProject => Path.Combine(Source, "PostgresBuilder", "PostgresBuilder.csproj");
 }

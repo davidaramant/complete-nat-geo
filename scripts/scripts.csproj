@@ -10,5 +10,6 @@
 	<ItemGroup>
 		<PackageReference Include="Bullseye" Version="6.1.0" />
 		<PackageReference Include="CliWrap" Version="3.10.5" />
+		<PackageReference Include="dotenv.net" Version="4.0.2" />
 	</ItemGroup>
 </Project>

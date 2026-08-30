@@ -22,6 +22,5 @@ switch (invocation)
 
 	case ConvertMetadataInvocation metadata:
 		await DatabaseConverter.ConvertMetadataAsync(connection, metadata.PostgresConnectionString);
-
 		break;
 }
