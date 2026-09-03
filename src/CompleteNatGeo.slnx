@@ -6,6 +6,7 @@
 	<Project Path="Api/Api.csproj" />
 	<Project Path="Client/Client.csproj" />
 	<Project Path="CngConverter/CngConverter.csproj" />
+	<Project Path="Data/Data.csproj" />
 	<Project Path="PostgresBuilder.Tests/PostgresBuilder.Tests.csproj" />
 	<Project Path="PostgresBuilder/PostgresBuilder.csproj" />
 </Solution>

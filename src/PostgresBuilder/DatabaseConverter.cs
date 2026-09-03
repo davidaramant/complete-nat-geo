@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using Dapper;
+using Microsoft.Data.Sqlite;
 
 namespace CompleteNatGeo.PostgresBuilder;
 
@@ -10,6 +11,14 @@ public static class DatabaseConverter
 		string postgresConnectionString
 	)
 	{
+		var legacyIssues = await connection.QueryAsync<LegacyModels.Issue>(
+			"SELECT * FROM issues order by search_time desc"
+		);
+		foreach (var legacyIssue in legacyIssues)
+		{
+			// TODO: expand to Page
+		}
+
 		await Task.CompletedTask;
 	}
 

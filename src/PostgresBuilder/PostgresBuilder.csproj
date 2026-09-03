@@ -13,4 +13,8 @@
 		<PackageReference Include="ShellProgressBar" />
 		<PackageReference Include="System.CommandLine" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Data\Data.csproj" />
+	</ItemGroup>
 </Project>
