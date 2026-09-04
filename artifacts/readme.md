@@ -1,1 +1,0 @@
-Contains generated artifacts from `PostgresBuilder`. Ignored from source control.

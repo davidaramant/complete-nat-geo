@@ -433,8 +433,4 @@ FodyWeavers.xsd
 ##################
 .idea/
 
-artifacts/*
-!artifacts/
-!artifacts/readme.md
-
 !template.env
