@@ -6,21 +6,38 @@ Invocation invocation = ArgumentParser.Parse(args);
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
-await using var connection = new SqliteConnection(invocation.SqliteConnectionString);
-connection.Open();
-
 switch (invocation)
 {
-	case VerifyMappingsInvocation:
-		await LegacySchemaVerification.VerifyMappingsAsync(connection);
+	case HelpInvocation:
 		break;
 
-	case ConvertPagesInvocation pages:
-		await DatabaseConverter.ConvertPagesAsync(connection, pages.ImagesPath, pages.PostgresConnectionString);
-		await DatabaseConverter.ConvertMetadataAsync(connection, pages.PostgresConnectionString);
+	case MergeInvocation merge:
+		await LegacyDatabaseMerger.MergeAsync(merge.BaseSqlitePath, merge.SourceSqlitePaths, merge.OutputSqlitePath);
 		break;
 
-	case ConvertMetadataInvocation metadata:
-		await DatabaseConverter.ConvertMetadataAsync(connection, metadata.PostgresConnectionString);
+	case LegacySqliteInvocation legacy:
+		await using (var connection = new SqliteConnection(legacy.SqliteConnectionString))
+		{
+			await connection.OpenAsync();
+			switch (legacy)
+			{
+				case VerifyMappingsInvocation:
+					await LegacySchemaVerification.VerifyMappingsAsync(connection);
+					break;
+
+				case ConvertPagesInvocation pages:
+					await DatabaseConverter.ConvertPagesAsync(
+						connection,
+						pages.ImagesPath,
+						pages.PostgresConnectionString
+					);
+					await DatabaseConverter.ConvertMetadataAsync(connection, pages.PostgresConnectionString);
+					break;
+
+				case ConvertMetadataInvocation metadata:
+					await DatabaseConverter.ConvertMetadataAsync(connection, metadata.PostgresConnectionString);
+					break;
+			}
+		}
 		break;
 }

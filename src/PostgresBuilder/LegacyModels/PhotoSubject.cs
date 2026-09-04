@@ -6,5 +6,5 @@ public sealed record PhotoSubject
 	public required string DisplayName { get; init; }
 	public required int SearchTime { get; init; }
 	public required int StartPageOffset { get; init; }
-	public required int PhotoId { get; init; }
+	public required int? PhotoId { get; init; }
 }

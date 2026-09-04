@@ -1,13 +1,21 @@
 namespace CompleteNatGeo.PostgresBuilder.Arguments;
 
-abstract record Invocation(string SqlitePath)
+abstract record Invocation;
+
+sealed record HelpInvocation : Invocation;
+
+abstract record LegacySqliteInvocation(string SqlitePath) : Invocation
 {
 	public string SqliteConnectionString => $"Data Source={SqlitePath}";
 }
 
-sealed record VerifyMappingsInvocation(string SqlitePath) : Invocation(SqlitePath);
+sealed record VerifyMappingsInvocation(string SqlitePath) : LegacySqliteInvocation(SqlitePath);
 
 sealed record ConvertPagesInvocation(string SqlitePath, string PostgresConnectionString, string ImagesPath)
-	: Invocation(SqlitePath);
+	: LegacySqliteInvocation(SqlitePath);
 
-sealed record ConvertMetadataInvocation(string SqlitePath, string PostgresConnectionString) : Invocation(SqlitePath);
+sealed record ConvertMetadataInvocation(string SqlitePath, string PostgresConnectionString)
+	: LegacySqliteInvocation(SqlitePath);
+
+sealed record MergeInvocation(string BaseSqlitePath, IReadOnlyList<string> SourceSqlitePaths, string OutputSqlitePath)
+	: Invocation;
