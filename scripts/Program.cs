@@ -10,6 +10,7 @@ Target("build", BuildSolutionAsync);
 
 Target("verify-schema", () => VerifySchemaAsync(config));
 Target("merge", () => MergeLegacyDatabasesAsync(config));
+Target("convertPages", () => ConvertPagesAsync(config));
 
 Target("up", ComposeUpAsync);
 Target("down", ComposeDownAsync);
@@ -102,6 +103,35 @@ static async Task ComposeDownAsync()
 
 	await Cli.Wrap("docker")
 		.WithArguments("compose --env-file .env down -v --remove-orphans")
+		.WithStandardOutputPipe(PipeTarget.ToStream(stdOut))
+		.WithStandardErrorPipe(PipeTarget.ToStream(stdErr))
+		.WithWorkingDirectory(RepoPath.Root)
+		.ExecuteAsync();
+}
+
+static async Task ConvertPagesAsync(Config config)
+{
+	await using var stdOut = Console.OpenStandardOutput();
+	await using var stdErr = Console.OpenStandardError();
+
+	await Cli.Wrap("dotnet")
+		.WithArguments(c =>
+		{
+			c.Add("run")
+				.Add("--project")
+				.Add(RepoPath.PostgresBuilderProject)
+				.Add("-c")
+				.Add("Release")
+				.Add("--")
+				.Add("convert")
+				.Add("--postgres-connection-string")
+				.Add(config.PostgresConnectionString)
+				.Add("pages")
+				.Add("--sqlite-path")
+				.Add(config.CompleteSqlitePath)
+				.Add("--images-path")
+				.Add(config.ImagesPath);
+		})
 		.WithStandardOutputPipe(PipeTarget.ToStream(stdOut))
 		.WithStandardErrorPipe(PipeTarget.ToStream(stdErr))
 		.WithWorkingDirectory(RepoPath.Root)

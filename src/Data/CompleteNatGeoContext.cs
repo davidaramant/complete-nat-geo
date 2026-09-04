@@ -29,6 +29,7 @@ public sealed class CompleteNatGeoContext : DbContext
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
+		modelBuilder.HasDefaultSchema("CompleteNatGeo");
 		modelBuilder.ApplyConfiguration(new PageConfiguration());
 	}
 }

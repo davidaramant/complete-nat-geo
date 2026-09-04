@@ -7,7 +7,7 @@ sealed class PageConfiguration : IEntityTypeConfiguration<Page>
 {
 	public void Configure(EntityTypeBuilder<Page> builder)
 	{
-		builder.ToTable("pages");
+		builder.ToTable("pages", "CompleteNatGeo");
 
 		builder.HasKey(page => page.Id);
 		builder.Property(page => page.Id).HasColumnName("id");

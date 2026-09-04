@@ -2,6 +2,7 @@
 using CompleteNatGeo.PostgresBuilder.Utilities;
 using Dapper;
 using Microsoft.Data.Sqlite;
+using Npgsql;
 
 namespace CompleteNatGeo.PostgresBuilder;
 
@@ -13,7 +14,10 @@ public static class DatabaseConverter
 		string postgresConnectionString
 	)
 	{
+		await RecreateSchemaAsync(postgresConnectionString);
 		await using var context = new CompleteNatGeoContext(postgresConnectionString);
+		await context.Database.EnsureCreatedAsync();
+
 		var legacyIssues = await connection.QueryAsync<LegacyModels.Issue>(
 			"SELECT * FROM issues order by search_time desc"
 		);
@@ -21,10 +25,10 @@ public static class DatabaseConverter
 		foreach (var legacyIssue in legacyIssues)
 		{
 			var releaseDate = legacyIssue.SearchTime.ToDate();
-			var decadeDir = $"{releaseDate.Year - releaseDate.Year % 10}s";
+			var decadeDir = $"{releaseDate.Year / 10}x";
 
 			var pageImages = Directory
-				.GetFiles(Path.Combine(imagesPath, decadeDir, legacyIssue.SearchTime.ToString(), "*.jpg"))
+				.GetFiles(Path.Combine(imagesPath, decadeDir, legacyIssue.SearchTime.ToString()), "*.jpg")
 				.Select(path => Path.GetRelativePath(imagesPath, path))
 				.OrderBy(name => name)
 				.ToArray();
@@ -53,5 +57,14 @@ public static class DatabaseConverter
 	public static Task ConvertMetadataAsync(SqliteConnection connection, string postgresConnectionString)
 	{
 		return Task.CompletedTask;
+	}
+
+	private static async Task RecreateSchemaAsync(string postgresConnectionString)
+	{
+		await using var connection = new NpgsqlConnection(postgresConnectionString);
+		await connection.OpenAsync();
+		await using var command = connection.CreateCommand();
+		command.CommandText = "DROP SCHEMA IF EXISTS \"CompleteNatGeo\" CASCADE; CREATE SCHEMA \"CompleteNatGeo\";";
+		await command.ExecuteNonQueryAsync();
 	}
 }
