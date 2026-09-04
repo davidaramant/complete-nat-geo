@@ -11,6 +11,9 @@ Target("build", BuildSolutionAsync);
 Target("verify-schema", () => VerifySchemaAsync(config));
 Target("merge", () => MergeLegacyDatabasesAsync(config));
 
+Target("up", ComposeUpAsync);
+Target("down", ComposeDownAsync);
+
 await RunTargetsAndExitAsync(args);
 return;
 
@@ -22,6 +25,7 @@ static Task CleanAsync() => Cli.Wrap("dotnet").WithArguments(c => c.Add("clean")
 static Task BuildSolutionAsync() =>
 	Cli.Wrap("dotnet")
 		.WithArguments(c => c.Add("build").Add(RepoPath.Solution).Add("-c").Add("Release"))
+		.WithWorkingDirectory(RepoPath.Root)
 		.ExecuteAsync();
 
 static async Task VerifySchemaAsync(Config config)
@@ -41,6 +45,7 @@ static async Task VerifySchemaAsync(Config config)
 				.Add(config.CompleteSqlitePath)
 		)
 		.WithStandardOutputPipe(PipeTarget.ToStream(stdOut))
+		.WithWorkingDirectory(RepoPath.Root)
 		.ExecuteAsync();
 }
 
@@ -73,5 +78,32 @@ static async Task MergeLegacyDatabasesAsync(Config config)
 		})
 		.WithStandardOutputPipe(PipeTarget.ToStream(stdOut))
 		.WithStandardErrorPipe(PipeTarget.ToStream(stdErr))
+		.WithWorkingDirectory(RepoPath.Root)
+		.ExecuteAsync();
+}
+
+static async Task ComposeUpAsync()
+{
+	await using var stdOut = Console.OpenStandardOutput();
+	await using var stdErr = Console.OpenStandardError();
+
+	await Cli.Wrap("docker")
+		.WithArguments("compose --env-file .env up -d --wait")
+		.WithStandardOutputPipe(PipeTarget.ToStream(stdOut))
+		.WithStandardErrorPipe(PipeTarget.ToStream(stdErr))
+		.WithWorkingDirectory(RepoPath.Root)
+		.ExecuteAsync();
+}
+
+static async Task ComposeDownAsync()
+{
+	await using var stdOut = Console.OpenStandardOutput();
+	await using var stdErr = Console.OpenStandardError();
+
+	await Cli.Wrap("docker")
+		.WithArguments("compose --env-file .env down -v --remove-orphans")
+		.WithStandardOutputPipe(PipeTarget.ToStream(stdOut))
+		.WithStandardErrorPipe(PipeTarget.ToStream(stdErr))
+		.WithWorkingDirectory(RepoPath.Root)
 		.ExecuteAsync();
 }
