@@ -17,6 +17,7 @@ public sealed class CompleteNatGeoContext : DbContext
 		_connectionString = connectionString;
 	}
 
+	public DbSet<Issue> Issues => Set<Issue>();
 	public DbSet<Page> Pages => Set<Page>();
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -30,6 +31,7 @@ public sealed class CompleteNatGeoContext : DbContext
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		modelBuilder.HasDefaultSchema("CompleteNatGeo");
+		modelBuilder.ApplyConfiguration(new IssueConfiguration());
 		modelBuilder.ApplyConfiguration(new PageConfiguration());
 	}
 }

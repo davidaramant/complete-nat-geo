@@ -21,7 +21,6 @@ public static class DatabaseConverter
 		var legacyIssues = await connection.QueryAsync<LegacyModels.Issue>(
 			"SELECT * FROM issues order by search_time desc"
 		);
-		var batch = new List<Page>();
 		foreach (var legacyIssue in legacyIssues)
 		{
 			var releaseDate = legacyIssue.SearchTime.ToDate();
@@ -33,9 +32,11 @@ public static class DatabaseConverter
 				.OrderBy(name => name)
 				.ToArray();
 
+			var issue = new Issue { ReleaseDate = releaseDate };
+
 			foreach (var pageImage in pageImages)
 			{
-				batch.Add(
+				issue.Pages.Add(
 					new Page
 					{
 						IssueDate = releaseDate,
@@ -46,11 +47,10 @@ public static class DatabaseConverter
 				);
 			}
 
-			context.Pages.AddRange(batch);
+			context.Issues.Add(issue);
 			await context.SaveChangesAsync();
 
 			context.ChangeTracker.Clear();
-			batch.Clear();
 		}
 	}
 
