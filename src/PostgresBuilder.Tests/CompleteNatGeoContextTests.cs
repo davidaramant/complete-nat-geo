@@ -43,4 +43,27 @@ public sealed class CompleteNatGeoContextTests
 		pagesNavigation.ShouldNotBeNull();
 		pagesNavigation.ForeignKey.ShouldBe(fk);
 	}
+
+	[Fact]
+	public void QueryTranslation_DecadesQueryGeneratesValidSql()
+	{
+		var options = new DbContextOptionsBuilder<CompleteNatGeoContext>()
+			.UseNpgsql("Host=localhost;Database=test;")
+			.Options;
+
+		using var context = new CompleteNatGeoContext(options);
+		var query = context
+			.Issues.GroupBy(i => i.ReleaseDate.Year / 10 * 10)
+			.OrderByDescending(g => g.Key)
+			.Select(g => new
+			{
+				Decade = g.Key,
+				FileName = g.OrderBy(i => i.ReleaseDate)
+					.Select(i => i.Pages.OrderBy(p => p.SortOrder).Select(p => p.FileName).FirstOrDefault())
+					.FirstOrDefault(),
+			});
+
+		var sql = query.ToQueryString();
+		sql.ShouldNotBeNullOrWhiteSpace();
+	}
 }

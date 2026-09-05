@@ -434,3 +434,5 @@ FodyWeavers.xsd
 .idea/
 
 !template.env
+
+src/Api/http-client.private.env.json

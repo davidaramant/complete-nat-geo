@@ -1,6 +1,4 @@
-@Api_HostAddress = http://localhost:5293
-
-GET {{Api_HostAddress}}/weatherforecast/
+GET {{Api_HostAddress}}/decades/
 Accept: application/json
 
 ###
