@@ -14,6 +14,7 @@ builder.Services.AddDbContext<CompleteNatGeoContext>(options =>
 
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
+builder.Services.AddSingleton<IImageContext, ImageContext>();
 
 // TODO: Check this stuff when deployment becomes real
 builder.Services.AddCors(options =>
@@ -45,12 +46,8 @@ app.MapHealthChecks("/health");
 
 app.MapGet(
 		"/decades",
-		async (CompleteNatGeoContext context, IConfiguration config) =>
+		async (CompleteNatGeoContext context, IImageContext imageContext) =>
 		{
-			// TODO: Pull this into an injectable helper
-			// Retrieve configured base URL (e.g., "http://localhost:5000/images/" in dev)
-			var imageBaseUrl = config["IMAGES_BASE_URL"]?.TrimEnd('/') ?? "/images";
-
 			var decades = await context
 				.Issues.GroupBy(i => i.ReleaseDate.Year / 10 * 10)
 				.OrderByDescending(g => g.Key)
@@ -58,8 +55,8 @@ app.MapGet(
 				{
 					Decade = g.Key,
 					FileName = g.OrderBy(i => i.ReleaseDate)
-						.Select(i => i.Pages.Where(p => p.SortOrder == 0).Select(p => p.FileName).FirstOrDefault())
-						.FirstOrDefault(),
+						.Select(i => i.Pages.Where(p => p.SortOrder == 0).Select(p => p.FileName).First())
+						.First(),
 					FirstIssueDate = g.OrderBy(i => i.ReleaseDate).Select(i => i.ReleaseDate).FirstOrDefault(),
 				})
 				.ToListAsync();
@@ -67,7 +64,7 @@ app.MapGet(
 			return decades.Select(d => new
 			{
 				decade = d.Decade,
-				imgUrl = $"{imageBaseUrl}/{d.Decade / 10}x/{d.FirstIssueDate:yyyyMMdd}/{d.FileName}.jpg",
+				imgUrl = imageContext.GetUrl(d.FirstIssueDate, d.FileName),
 			});
 		}
 	)
