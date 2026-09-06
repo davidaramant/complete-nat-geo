@@ -31,7 +31,7 @@ if (app.Environment.IsDevelopment())
 	app.MapOpenApi();
 
 	// Serve images from the local folder specified in ImagesPath
-	var imagesPath = builder.Configuration["ImagesPath"];
+	var imagesPath = builder.Configuration["IMAGES_PATH"];
 	if (!string.IsNullOrWhiteSpace(imagesPath) && Directory.Exists(imagesPath))
 	{
 		app.UseStaticFiles(
@@ -49,7 +49,7 @@ app.MapGet(
 		{
 			// TODO: Pull this into an injectable helper
 			// Retrieve configured base URL (e.g., "http://localhost:5000/images/" in dev)
-			var imageBaseUrl = config["ImageBaseUrl"]?.TrimEnd('/') ?? "/images";
+			var imageBaseUrl = config["IMAGES_BASE_URL"]?.TrimEnd('/') ?? "/images";
 
 			var decades = await context
 				.Issues.GroupBy(i => i.ReleaseDate.Year / 10 * 10)
