@@ -32,14 +32,19 @@ app.MapGet(
 				.OrderByDescending(g => g.Key)
 				.Select(g => new
 				{
-					decade = g.Key,
-					fileName = g.OrderBy(i => i.ReleaseDate)
+					Decade = g.Key,
+					FileName = g.OrderBy(i => i.ReleaseDate)
 						.Select(i => i.Pages.Where(p => p.SortOrder == 0).Select(p => p.FileName).FirstOrDefault())
 						.FirstOrDefault(),
+					FirstIssueDate = g.OrderBy(i => i.ReleaseDate).Select(i => i.ReleaseDate).FirstOrDefault(),
 				})
 				.ToListAsync();
 
-			return decades;
+			return decades.Select(d => new
+			{
+				decade = d.Decade,
+				imgUrl = (d.Decade / 10) + "x/" + d.FirstIssueDate.ToString("yyyyMMdd") + "/" + d.FileName + ".jpg",
+			});
 		}
 	)
 	.WithName("GetDecades");

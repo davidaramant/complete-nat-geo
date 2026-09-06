@@ -14,6 +14,11 @@ sealed class PageConfiguration : IEntityTypeConfiguration<Page>
 		builder.Property(page => page.IssueDate).HasColumnName("issue_date");
 		builder.Property(page => page.SortOrder).HasColumnName("sort_order");
 		builder.Property(page => page.PageNumber).HasColumnName("page_number");
-		builder.Property(page => page.FileName).HasColumnName("file_name").HasMaxLength(255).IsRequired();
+		builder
+			.Property(page => page.FileName)
+			.HasColumnName("file_name")
+			.IsUnicode(false)
+			.HasMaxLength(64)
+			.IsRequired();
 	}
 }

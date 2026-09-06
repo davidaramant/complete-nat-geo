@@ -18,23 +18,21 @@ public static class DatabaseConverter
 		await using var context = new CompleteNatGeoContext(postgresConnectionString);
 		await context.Database.EnsureCreatedAsync();
 
-		var legacyIssues = await connection.QueryAsync<LegacyModels.Issue>(
-			"SELECT * FROM issues order by search_time desc"
-		);
-		foreach (var legacyIssue in legacyIssues)
+		var legacyIssues = await connection.QueryAsync<LegacyModels.Issue>("SELECT * FROM issues order by search_time");
+		foreach (var (legacyIssue, issueIndex) in legacyIssues.WithIndex())
 		{
 			var releaseDate = legacyIssue.SearchTime.ToDate();
 			var decadeDir = $"{releaseDate.Year / 10}x";
 
 			var pageImages = Directory
 				.GetFiles(Path.Combine(imagesPath, decadeDir, legacyIssue.SearchTime.ToString()), "*.jpg")
-				.Select(path => Path.GetRelativePath(imagesPath, path))
+				.Select(path => Path.GetFileNameWithoutExtension(path))
 				.OrderBy(name => name)
 				.ToArray();
 
-			var issue = new Issue { ReleaseDate = releaseDate };
+			var issue = new Issue { ReleaseDate = releaseDate, ReleaseOrder = issueIndex };
 
-			foreach (var pageImage in pageImages)
+			foreach (var (pageImage, pageIndex) in pageImages.WithIndex())
 			{
 				issue.Pages.Add(
 					new Page
@@ -42,7 +40,7 @@ public static class DatabaseConverter
 						IssueDate = releaseDate,
 						FileName = pageImage,
 						PageNumber = null,
-						SortOrder = 0,
+						SortOrder = pageIndex,
 					}
 				);
 			}

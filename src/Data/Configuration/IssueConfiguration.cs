@@ -11,9 +11,8 @@ sealed class IssueConfiguration : IEntityTypeConfiguration<Issue>
 
 		builder.HasKey(issue => issue.ReleaseDate);
 		builder.Property(issue => issue.ReleaseDate).HasColumnName("release_date");
+		builder.Property(issue => issue.ReleaseOrder).HasColumnName("release_order");
 
-		builder.HasMany(issue => issue.Pages)
-			.WithOne()
-			.HasForeignKey(page => page.IssueDate);
+		builder.HasMany(issue => issue.Pages).WithOne().HasForeignKey(page => page.IssueDate);
 	}
 }
