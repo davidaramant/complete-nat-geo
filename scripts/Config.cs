@@ -6,6 +6,7 @@ public sealed record Config(
 	string CompleteSqlitePath,
 	string SeparateSqlitePath,
 	string ImagesPath,
+	string PostgresHost,
 	string PostgresUser,
 	string PostgresPassword,
 	string PostgresDbName,
@@ -20,6 +21,7 @@ public sealed record Config(
 			CompleteSqlitePath: envVars["CompleteSqlitePath"],
 			SeparateSqlitePath: envVars["SeparateSqlitePath"],
 			ImagesPath: envVars["ImagesPath"],
+			PostgresHost: envVars["POSTGRES_HOST"],
 			PostgresUser: envVars["POSTGRES_USER"],
 			PostgresPassword: envVars["POSTGRES_PASSWORD"],
 			PostgresDbName: envVars["POSTGRES_DB"],
@@ -28,5 +30,5 @@ public sealed record Config(
 	}
 
 	public string PostgresConnectionString =>
-		$"Host=localhost;Port={PostgresPort};Database={PostgresDbName};Username={PostgresUser};Password={PostgresPassword};";
+		$"Host={PostgresHost};Port={PostgresPort};Database={PostgresDbName};Username={PostgresUser};Password={PostgresPassword};";
 }
