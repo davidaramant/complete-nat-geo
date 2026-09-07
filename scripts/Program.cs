@@ -11,6 +11,7 @@ Target("build", BuildSolutionAsync);
 Target("verify-schema", () => VerifySchemaAsync(config));
 Target("merge", () => MergeLegacyDatabasesAsync(config));
 Target("convertPages", () => ConvertPagesAsync(config));
+Target("thumbnails", ()=>CreateThumbnailsAsync(config));
 
 Target("up", ComposeUpAsync);
 Target("down", ComposeDownAsync);
@@ -136,4 +137,24 @@ static async Task ConvertPagesAsync(Config config)
 		.WithStandardErrorPipe(PipeTarget.ToStream(stdErr))
 		.WithWorkingDirectory(RepoPath.Root)
 		.ExecuteAsync();
+}
+
+static async Task CreateThumbnailsAsync(Config config)
+{
+    await using var stdOut = Console.OpenStandardOutput();
+
+    await Cli.Wrap("dotnet")
+	    .WithArguments(c =>
+		    c.Add("run")
+			    .Add("--project")
+			    .Add(RepoPath.ThumbnailGeneratorProject)
+			    .Add("-c")
+			    .Add("Release")
+			    .Add("--")
+			    .Add("--image-path")
+			    .Add(config.ImagesPath)
+	    )
+	    .WithStandardOutputPipe(PipeTarget.ToStream(stdOut))
+	    .WithWorkingDirectory(RepoPath.Root)
+	    .ExecuteAsync();
 }

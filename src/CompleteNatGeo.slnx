@@ -11,4 +11,6 @@
 	<Project Path="Data/Data.csproj" />
 	<Project Path="PostgresBuilder.Tests/PostgresBuilder.Tests.csproj" />
 	<Project Path="PostgresBuilder/PostgresBuilder.csproj" />
+	<Project Path="ThumbnailGenerator/ThumbnailGenerator.csproj" />
+	<Project Path="ThumbnailGenerator.Tests/ThumbnailGenerator.Tests.csproj" />
 </Solution>
