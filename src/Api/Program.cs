@@ -89,13 +89,20 @@ app.MapGet(
 				})
 				.ToListAsync();
 
-			return issues.Select(i => new
+			return new
 			{
-				releaseDate = i.ReleaseDate,
-				id = i.Id,
-				imgUrl = imageContext.GetUrl(i.ReleaseDate, i.FileName),
-				pages = i.NumPages,
-			});
+				hasPrevious = await context.Issues.AnyAsync(i => i.Decade == decade - 10),
+				hasNext = await context.Issues.AnyAsync(i => i.Decade == decade + 10),
+				issues = issues
+					.Select(i => new
+					{
+						releaseDate = i.ReleaseDate,
+						id = i.Id,
+						imgUrl = imageContext.GetUrl(i.ReleaseDate, i.FileName),
+						pages = i.NumPages,
+					})
+					.ToArray(),
+			};
 		}
 	)
 	.WithName("GetDecade");
@@ -110,6 +117,8 @@ app.MapGet(
 			{
 				releaseDate = issue.ReleaseDate,
 				id = issue.Id,
+				hasPrevious = id > 1,
+				hasNext = await context.Issues.AnyAsync(i => i.Id > id),
 				pages = issue
 					.Pages.OrderBy(p => p.SortOrder)
 					.Select(p => new

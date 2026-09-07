@@ -3,12 +3,12 @@ Accept: application/json
 
 ###
 
-GET {{Api_HostAddress}}/decades/1980/
+GET {{Api_HostAddress}}/decades/2010/
 Accept: application/json
 
 ###
 
-GET {{Api_HostAddress}}/issues/100/
+GET {{Api_HostAddress}}/issues/1/
 Accept: application/json
 
 ###
