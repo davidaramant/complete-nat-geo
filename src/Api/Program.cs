@@ -100,6 +100,29 @@ app.MapGet(
 	)
 	.WithName("GetDecade");
 
+app.MapGet(
+		"/issues/{id:int}",
+		async (CompleteNatGeoContext context, IImageContext imageContext, [FromRoute] int id) =>
+		{
+			var issue = await context.Issues.Include(i => i.Pages).FirstAsync(i => i.Id == id);
+
+			return new
+			{
+				releaseDate = issue.ReleaseDate,
+				id = issue.Id,
+				pages = issue
+					.Pages.OrderBy(p => p.SortOrder)
+					.Select(p => new
+					{
+						sortOrder = p.SortOrder,
+						pageNumber = p.PageNumber,
+						imgUrl = imageContext.GetUrl(issue.ReleaseDate, p.FileName),
+					}),
+			};
+		}
+	)
+	.WithName("GetIssue");
+
 app.Run();
 
 static string GetPostgresConnectionString(IConfigurationManager config)
