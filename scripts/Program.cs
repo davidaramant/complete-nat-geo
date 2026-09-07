@@ -43,7 +43,7 @@ static async Task VerifySchemaAsync(Config config)
 				.Add("--")
 				.Add("verify-mappings")
 				.Add("--sqlite-path")
-				.Add(config.CompleteSqlitePath)
+				.Add(config.CombinedSqlitePath)
 		)
 		.WithStandardOutputPipe(PipeTarget.ToStream(stdOut))
 		.WithWorkingDirectory(RepoPath.Root)
@@ -75,7 +75,7 @@ static async Task MergeLegacyDatabasesAsync(Config config)
 				c.Add("--source-sqlite-path").Add(db);
 			}
 
-			c.Add("--output-sqlite-path").Add(config.CompleteSqlitePath);
+			c.Add("--output-sqlite-path").Add(config.CombinedSqlitePath);
 		})
 		.WithStandardOutputPipe(PipeTarget.ToStream(stdOut))
 		.WithStandardErrorPipe(PipeTarget.ToStream(stdErr))
@@ -128,7 +128,7 @@ static async Task ConvertPagesAsync(Config config)
 				.Add(config.PostgresConnectionString)
 				.Add("pages")
 				.Add("--sqlite-path")
-				.Add(config.CompleteSqlitePath)
+				.Add(config.CombinedSqlitePath)
 				.Add("--images-path")
 				.Add(config.ImagesPath);
 		})

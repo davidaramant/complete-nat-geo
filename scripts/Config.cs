@@ -3,7 +3,7 @@ using dotenv.net;
 namespace Scripts;
 
 public sealed record Config(
-	string CompleteSqlitePath,
+	string CombinedSqlitePath,
 	string SeparateSqlitePath,
 	string ImagesPath,
 	string PostgresHost,
@@ -18,9 +18,9 @@ public sealed record Config(
 		var envVars = DotEnv.Read(options: new DotEnvOptions(envFilePaths: [Path.Combine(RepoPath.Root, ".env")]));
 
 		return new Config(
-			CompleteSqlitePath: envVars["CompleteSqlitePath"],
-			SeparateSqlitePath: envVars["SeparateSqlitePath"],
-			ImagesPath: envVars["ImagesPath"],
+			CombinedSqlitePath: envVars["COMBINED_SQLITE_PATH"],
+			SeparateSqlitePath: envVars["SEPARATE_SQLITE_PATH"],
+			ImagesPath: envVars["IMAGES_PATH"],
 			PostgresHost: envVars["POSTGRES_HOST"],
 			PostgresUser: envVars["POSTGRES_USER"],
 			PostgresPassword: envVars["POSTGRES_PASSWORD"],
