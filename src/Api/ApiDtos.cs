@@ -14,6 +14,7 @@ public sealed record IssueSummaryDto(int Id, DateOnly ReleaseDate, int PageCount
 public sealed record IssueDetailDto(
 	int Id,
 	DateOnly ReleaseDate,
+	string CoverImageUrl,
 	int Decade,
 	int? PreviousIssueId,
 	int? NextIssueId,

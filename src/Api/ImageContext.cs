@@ -2,7 +2,8 @@ namespace Api;
 
 internal interface IImageContext
 {
-	string GetUrl(DateOnly date, string fileName);
+	string GetFullSizeUrl(DateOnly date, string fileName);
+	string GetThumbnailUrl(DateOnly date, string fileName);
 }
 
 internal sealed class ImageContext : IImageContext
@@ -16,6 +17,9 @@ internal sealed class ImageContext : IImageContext
 			?? throw new ArgumentException("IMAGES_BASE_URL is not configured");
 	}
 
-	public string GetUrl(DateOnly date, string fileName) =>
+	public string GetFullSizeUrl(DateOnly date, string fileName) =>
 		$"{_imagesBaseUrl}/{date.Year / 10}x/{date:yyyyMMdd}/{fileName}.jpg";
+
+	public string GetThumbnailUrl(DateOnly date, string fileName) =>
+		$"{_imagesBaseUrl}/{date.Year / 10}x/{date:yyyyMMdd}/{fileName}.thumb.webp";
 }

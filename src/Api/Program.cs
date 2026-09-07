@@ -68,7 +68,7 @@ api.MapGet(
 
 			return decades.Select(d => new DecadeSummaryDto(
 				Decade: d.Decade,
-				CoverImageUrl: imageContext.GetUrl(GetDecadeDate(d.Decade, context), d.CoverImageUrl)
+				CoverImageUrl: imageContext.GetThumbnailUrl(GetDecadeDate(d.Decade, context), d.CoverImageUrl)
 			));
 		}
 	)
@@ -114,7 +114,7 @@ api.MapGet(
 							Id: i.Id,
 							ReleaseDate: i.ReleaseDate,
 							PageCount: i.PageCount,
-							CoverImageUrl: imageContext.GetUrl(i.ReleaseDate, i.FileName)
+							CoverImageUrl: imageContext.GetThumbnailUrl(i.ReleaseDate, i.FileName)
 						))
 						.ToList()
 				)
@@ -165,6 +165,10 @@ api.MapGet(
 				new IssueDetailDto(
 					Id: issue.Id,
 					ReleaseDate: issue.ReleaseDate,
+					CoverImageUrl: imageContext.GetFullSizeUrl(
+						issue.ReleaseDate,
+						issue.Pages.Where(p => p.SortOrder == 0).Select(p => p.FileName).Single()
+					),
 					Decade: issue.Decade,
 					PreviousIssueId: previousIssueId,
 					NextIssueId: nextIssueId,
@@ -173,7 +177,7 @@ api.MapGet(
 							Id: p.Id,
 							SortOrder: p.SortOrder,
 							PageNumber: p.PageNumber,
-							ImageUrl: imageContext.GetUrl(issue.ReleaseDate, p.FileName)
+							ImageUrl: imageContext.GetThumbnailUrl(issue.ReleaseDate, p.FileName)
 						))
 						.ToList()
 				)
@@ -224,7 +228,7 @@ api.MapGet(
 					ReleaseDate: page.ReleaseDate,
 					PreviousPageId: previousPageId,
 					NextPageId: nextPageId,
-					ImageUrl: imageContext.GetUrl(page.ReleaseDate, page.FileName)
+					ImageUrl: imageContext.GetFullSizeUrl(page.ReleaseDate, page.FileName)
 				)
 			);
 		}
