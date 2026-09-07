@@ -2,6 +2,7 @@
 using CompleteNatGeo.PostgresBuilder.Utilities;
 using Dapper;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace CompleteNatGeo.PostgresBuilder;
@@ -16,6 +17,7 @@ public static class DatabaseConverter
 	{
 		await RecreateSchemaAsync(postgresConnectionString);
 		await using var context = new CompleteNatGeoContext(postgresConnectionString);
+		context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.TrackAll;
 		await context.Database.EnsureCreatedAsync();
 
 		var legacyIssues = await connection.QueryAsync<LegacyModels.Issue>("SELECT * FROM issues order by search_time");

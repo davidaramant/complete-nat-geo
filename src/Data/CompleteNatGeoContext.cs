@@ -26,6 +26,8 @@ public sealed class CompleteNatGeoContext : DbContext
 		{
 			optionsBuilder.UseNpgsql(_connectionString);
 		}
+
+		optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 	}
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)

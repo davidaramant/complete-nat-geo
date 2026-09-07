@@ -1,24 +1,19 @@
-GET {{Api_HostAddress}}/decades/
+### Get All Decades
+GET {{Api_HostAddress}}/api/v1/decades/
 Accept: application/json
 
-###
-
-GET {{Api_HostAddress}}/decades/2010/
+### Get Decade 2010
+GET {{Api_HostAddress}}/api/v1/decades/2010/
 Accept: application/json
 
-###
-
-GET {{Api_HostAddress}}/issues/1/
+### Get Issue 1
+GET {{Api_HostAddress}}/api/v1/issues/1/
 Accept: application/json
 
-###
-
-GET {{Api_HostAddress}}/pages/1/
+### Get Page 1
+GET {{Api_HostAddress}}/api/v1/pages/1/
 Accept: application/json
 
-###
-
-GET {{Api_HostAddress}}/pages/2/
+### Get Page 2
+GET {{Api_HostAddress}}/api/v1/pages/2/
 Accept: application/json
-
-###
