@@ -123,6 +123,7 @@ app.MapGet(
 					.Pages.OrderBy(p => p.SortOrder)
 					.Select(p => new
 					{
+						id = p.Id,
 						sortOrder = p.SortOrder,
 						pageNumber = p.PageNumber,
 						imgUrl = imageContext.GetUrl(issue.ReleaseDate, p.FileName),
@@ -131,6 +132,32 @@ app.MapGet(
 		}
 	)
 	.WithName("GetIssue");
+
+app.MapGet(
+		"/pages/{id:int}",
+		async (CompleteNatGeoContext context, IImageContext imageContext, [FromRoute] int id) =>
+		{
+			var page = await context.Pages.FirstAsync(i => i.Id == id);
+
+			var releaseDate = await context
+				.Issues.Where(i => i.Id == page.IssueId)
+				.Select(i => i.ReleaseDate)
+				.FirstAsync();
+
+			return new
+			{
+				releaseDate = releaseDate,
+				issueId = page.IssueId,
+				id = page.Id,
+				hasPrevious = page.SortOrder > 0,
+				hasNext = await context.Pages.AnyAsync(p => p.IssueId == page.IssueId && p.SortOrder > page.SortOrder),
+				sortOrder = page.SortOrder,
+				pageNumber = page.PageNumber,
+				imgUrl = imageContext.GetUrl(releaseDate, page.FileName),
+			};
+		}
+	)
+	.WithName("GetPage");
 
 app.Run();
 

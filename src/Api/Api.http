@@ -12,3 +12,13 @@ GET {{Api_HostAddress}}/issues/1/
 Accept: application/json
 
 ###
+
+GET {{Api_HostAddress}}/pages/1/
+Accept: application/json
+
+###
+
+GET {{Api_HostAddress}}/pages/2/
+Accept: application/json
+
+###
