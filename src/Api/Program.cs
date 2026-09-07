@@ -1,6 +1,7 @@
 using Api;
 using CompleteNatGeo.Data;
 using DotNetEnv;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
@@ -49,7 +50,7 @@ app.MapGet(
 		async (CompleteNatGeoContext context, IImageContext imageContext) =>
 		{
 			var decades = await context
-				.Issues.GroupBy(i => i.ReleaseDate.Year / 10 * 10)
+				.Issues.GroupBy(i => i.Decade)
 				.OrderByDescending(g => g.Key)
 				.Select(g => new
 				{
@@ -58,6 +59,7 @@ app.MapGet(
 						.Select(i => i.Pages.Where(p => p.SortOrder == 0).Select(p => p.FileName).First())
 						.First(),
 					FirstIssueDate = g.OrderBy(i => i.ReleaseDate).Select(i => i.ReleaseDate).FirstOrDefault(),
+					NumIssues = g.Count(),
 				})
 				.ToListAsync();
 
@@ -65,10 +67,38 @@ app.MapGet(
 			{
 				decade = d.Decade,
 				imgUrl = imageContext.GetUrl(d.FirstIssueDate, d.FileName),
+				issues = d.NumIssues,
 			});
 		}
 	)
 	.WithName("GetDecades");
+
+app.MapGet(
+		"/decades/{decade:int}",
+		async (CompleteNatGeoContext context, IImageContext imageContext, [FromRoute] int decade) =>
+		{
+			var issues = await context
+				.Issues.Where(i => i.Decade == decade)
+				.OrderBy(i => i.ReleaseDate)
+				.Select(i => new
+				{
+					i.ReleaseDate,
+					i.Id,
+					FileName = i.Pages.Where(p => p.SortOrder == 0).Select(p => p.FileName).First(),
+					NumPages = i.Pages.Count,
+				})
+				.ToListAsync();
+
+			return issues.Select(i => new
+			{
+				releaseDate = i.ReleaseDate,
+				id = i.Id,
+				imgUrl = imageContext.GetUrl(i.ReleaseDate, i.FileName),
+				pages = i.NumPages,
+			});
+		}
+	)
+	.WithName("GetDecade");
 
 app.Run();
 

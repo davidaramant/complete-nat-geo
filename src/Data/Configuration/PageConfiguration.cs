@@ -11,7 +11,7 @@ sealed class PageConfiguration : IEntityTypeConfiguration<Page>
 
 		builder.HasKey(page => page.Id);
 		builder.Property(page => page.Id).HasColumnName("id");
-		builder.Property(page => page.IssueDate).HasColumnName("issue_date");
+		builder.Property(page => page.IssueId).HasColumnName("issue_id");
 		builder.Property(page => page.SortOrder).HasColumnName("sort_order");
 		builder.Property(page => page.PageNumber).HasColumnName("page_number");
 		builder
@@ -20,5 +20,7 @@ sealed class PageConfiguration : IEntityTypeConfiguration<Page>
 			.IsUnicode(false)
 			.HasMaxLength(64)
 			.IsRequired();
+
+		builder.HasIndex(page => new { page.IssueId, page.SortOrder });
 	}
 }

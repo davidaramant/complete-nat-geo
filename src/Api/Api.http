@@ -2,3 +2,8 @@ GET {{Api_HostAddress}}/decades/
 Accept: application/json
 
 ###
+
+GET {{Api_HostAddress}}/decades/1980/
+Accept: application/json
+
+###

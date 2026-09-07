@@ -19,7 +19,7 @@ public static class DatabaseConverter
 		await context.Database.EnsureCreatedAsync();
 
 		var legacyIssues = await connection.QueryAsync<LegacyModels.Issue>("SELECT * FROM issues order by search_time");
-		foreach (var (legacyIssue, issueIndex) in legacyIssues.WithIndex())
+		foreach (var legacyIssue in legacyIssues)
 		{
 			var releaseDate = legacyIssue.SearchTime.ToDate();
 			var decadeDir = $"{releaseDate.Year / 10}x";
@@ -30,14 +30,13 @@ public static class DatabaseConverter
 				.OrderBy(name => name)
 				.ToArray();
 
-			var issue = new Issue { ReleaseDate = releaseDate, ReleaseOrder = issueIndex };
+			var issue = new Issue { ReleaseDate = releaseDate };
 
 			foreach (var (pageImage, pageIndex) in pageImages.WithIndex())
 			{
 				issue.Pages.Add(
 					new Page
 					{
-						IssueDate = releaseDate,
 						FileName = pageImage,
 						PageNumber = null,
 						SortOrder = pageIndex,

@@ -23,7 +23,8 @@ public sealed class CompleteNatGeoContextTests
 
 		var issuePk = issueEntity.FindPrimaryKey();
 		issuePk.ShouldNotBeNull();
-		issuePk.Properties.Select(p => p.Name).ShouldBe(["ReleaseDate"]);
+		issuePk.Properties.Select(p => p.Name).ShouldBe(["Id"]);
+		issueEntity.FindProperty(nameof(Issue.Id))?.GetColumnName().ShouldBe("id");
 		issueEntity.FindProperty(nameof(Issue.ReleaseDate))?.GetColumnName().ShouldBe("release_date");
 
 		var pageEntity = model.FindEntityType(typeof(Page));
@@ -36,8 +37,8 @@ public sealed class CompleteNatGeoContextTests
 
 		var fk = foreignKeys.Single();
 		fk.PrincipalEntityType.ClrType.ShouldBe(typeof(Issue));
-		fk.Properties.Select(p => p.Name).ShouldBe(["IssueDate"]);
-		fk.PrincipalKey.Properties.Select(p => p.Name).ShouldBe(["ReleaseDate"]);
+		fk.Properties.Select(p => p.Name).ShouldBe(["IssueId"]);
+		fk.PrincipalKey.Properties.Select(p => p.Name).ShouldBe(["Id"]);
 
 		var pagesNavigation = issueEntity.FindNavigation(nameof(Issue.Pages));
 		pagesNavigation.ShouldNotBeNull();
