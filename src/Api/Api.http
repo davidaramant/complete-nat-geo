@@ -2,8 +2,20 @@
 GET {{Api_HostAddress}}/api/v1/decades/
 Accept: application/json
 
+### Get Decade 1880
+GET {{Api_HostAddress}}/api/v1/decades/1880/
+Accept: application/json
+
 ### Get Decade 2010
 GET {{Api_HostAddress}}/api/v1/decades/2010/
+Accept: application/json
+
+### Get First Year
+GET {{Api_HostAddress}}/api/v1/years/1888/
+Accept: application/json
+
+### Get Last Year
+GET {{Api_HostAddress}}/api/v1/years/2013/
 Accept: application/json
 
 ### Get Issue 1

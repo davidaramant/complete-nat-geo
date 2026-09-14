@@ -52,15 +52,17 @@ api.MapGet(
 		async (CompleteNatGeoContext context, IImageContext imageContext) =>
 		{
 			var decades = await context
-				.Issues.GroupBy(i => i.Decade)
+				.Issues
+				.GroupBy(i => i.Decade)
 				.OrderByDescending(g => g.Key)
 				.Select(g => new
 				{
 					Decade = g.Key,
-					FileName = g.OrderBy(i => i.ReleaseDate)
-						.Select(i => i.Pages.Where(p => p.SortOrder == 0).Select(p => p.FileName).First())
-						.First(),
-					CoverImageUrl = g.OrderBy(i => i.ReleaseDate)
+					FirstYear = g.Min(i => i.ReleaseDate.Year),
+					LastYear = g.Max(i => i.ReleaseDate.Year),
+					FirstReleaseDate = g.Min(i => i.ReleaseDate),
+					CoverFileName = g
+						.OrderBy(i => i.ReleaseDate)
 						.Select(i => i.Pages.Where(p => p.SortOrder == 0).Select(p => p.FileName).First())
 						.First(),
 				})
@@ -68,7 +70,9 @@ api.MapGet(
 
 			return decades.Select(d => new DecadeSummaryDto(
 				Decade: d.Decade,
-				CoverImageUrl: imageContext.GetThumbnailUrl(GetDecadeDate(d.Decade, context), d.CoverImageUrl)
+				FirstYear: d.FirstYear,
+				LastYear: d.LastYear,
+				CoverImageUrl: imageContext.GetThumbnailUrl(d.FirstReleaseDate, d.CoverFileName)
 			));
 		}
 	)
@@ -95,14 +99,15 @@ api.MapGet(
 				return Results.NotFound();
 			}
 
-			var availableDecades = await context.Issues.Select(i => i.Decade).Distinct().OrderBy(d => d).ToListAsync();
+			var previousDecade = await context
+				.Issues.Where(i => i.Decade < decade)
+				.Select(i => (int?)i.Decade)
+				.MaxAsync();
 
-			var decadeIndex = availableDecades.IndexOf(decade);
-			var previousDecade = decadeIndex > 0 ? availableDecades[decadeIndex - 1] : (int?)null;
-			var nextDecade =
-				decadeIndex >= 0 && decadeIndex < availableDecades.Count - 1
-					? availableDecades[decadeIndex + 1]
-					: (int?)null;
+			var nextDecade = await context
+				.Issues.Where(i => i.Decade > decade)
+				.Select(i => (int?)i.Decade)
+				.MinAsync();
 
 			return Results.Ok(
 				new DecadeDetailDto(
@@ -124,6 +129,56 @@ api.MapGet(
 	.WithName("GetDecade");
 
 api.MapGet(
+		"/years/{year:int}",
+		async (CompleteNatGeoContext context, IImageContext imageContext, [FromRoute] int year) =>
+		{
+			var issues = await context
+				.Issues.Where(i => i.ReleaseDate.Year == year)
+				.OrderBy(i => i.ReleaseDate)
+				.Select(i => new
+				{
+					i.Id,
+					i.ReleaseDate,
+					FileName = i.Pages.Where(p => p.SortOrder == 0).Select(p => p.FileName).First(),
+					PageCount = i.Pages.Count,
+				})
+				.ToListAsync();
+
+			if (issues.Count == 0)
+			{
+				return Results.NotFound();
+			}
+
+			var previousYear = await context
+				.Issues.Where(i => i.ReleaseDate.Year < year)
+				.Select(i => (int?)i.ReleaseDate.Year)
+				.MaxAsync();
+
+			var nextYear = await context
+				.Issues.Where(i => i.ReleaseDate.Year > year)
+				.Select(i => (int?)i.ReleaseDate.Year)
+				.MinAsync();
+
+			return Results.Ok(
+				new YearDetailDto(
+					Year: year,
+					PreviousYear: previousYear,
+					NextYear: nextYear,
+					Issues: issues
+						.Select(i => new IssueSummaryDto(
+							Id: i.Id,
+							ReleaseDate: i.ReleaseDate,
+							PageCount: i.PageCount,
+							CoverImageUrl: imageContext.GetThumbnailUrl(i.ReleaseDate, i.FileName)
+						))
+						.ToList()
+				)
+			);
+		}
+	)
+	.WithName("GetYear");
+
+api.MapGet(
 		"/issues/{id:int}",
 		async (CompleteNatGeoContext context, IImageContext imageContext, [FromRoute] int id) =>
 		{
@@ -138,10 +193,10 @@ api.MapGet(
 						.Pages.OrderBy(p => p.SortOrder)
 						.Select(p => new
 						{
-							Id = p.Id,
-							SortOrder = p.SortOrder,
-							PageNumber = p.PageNumber,
-							FileName = p.FileName,
+							p.Id,
+							p.SortOrder,
+							p.PageNumber,
+							p.FileName,
 						})
 						.ToArray(),
 				})
@@ -152,14 +207,15 @@ api.MapGet(
 				return Results.NotFound();
 			}
 
-			var orderedIssueIds = await context
-				.Issues.OrderBy(i => i.ReleaseDate)
-				.Select(i => new { i.Id, i.ReleaseDate })
-				.ToListAsync();
+			var previousIssueId = await context
+				.Issues.Where(i => i.ReleaseDate < issue.ReleaseDate)
+				.Select(i => (int?)i.Id)
+				.MaxAsync();
 
-			var issueIndex = orderedIssueIds.FindIndex(i => i.Id == issue.Id);
-			var previousIssueId = issueIndex > 0 ? orderedIssueIds[issueIndex - 1].Id : (int?)null;
-			var nextIssueId = issueIndex < orderedIssueIds.Count - 1 ? orderedIssueIds[issueIndex + 1].Id : (int?)null;
+			var nextIssueId = await context
+				.Issues.Where(i => i.ReleaseDate > issue.ReleaseDate)
+				.Select(i => (int?)i.Id)
+				.MinAsync();
 
 			return Results.Ok(
 				new IssueDetailDto(
@@ -191,17 +247,22 @@ api.MapGet(
 		async (CompleteNatGeoContext context, IImageContext imageContext, [FromRoute] int id) =>
 		{
 			var page = await context
-				.Pages.Where(p => p.Id == id)
-				.Select(p => new
-				{
-					p.Id,
-					p.IssueId,
-					p.SortOrder,
-					p.PageNumber,
-					p.FileName,
-					ReleaseDate = context.Issues.Where(i => i.Id == p.IssueId).Select(i => i.ReleaseDate).First(),
-					Decade = context.Issues.Where(i => i.Id == p.IssueId).Select(i => i.Decade).First(),
-				})
+				.Pages
+				.Where(p => p.Id == id)
+				.Join(
+					context.Issues,
+					page => page.IssueId,
+					issue => issue.Id,
+					(page, issue) => new
+					{
+						page.Id,
+						page.IssueId,
+						page.SortOrder,
+						page.PageNumber,
+						page.FileName,
+						issue.ReleaseDate,
+		            				issue.Decade,
+					})
 				.SingleOrDefaultAsync();
 
 			if (page is null)
@@ -236,11 +297,6 @@ api.MapGet(
 	.WithName("GetPage");
 
 app.Run();
-
-static DateOnly GetDecadeDate(int decade, CompleteNatGeoContext context)
-{
-	return context.Issues.Where(i => i.Decade == decade).OrderBy(i => i.ReleaseDate).Select(i => i.ReleaseDate).First();
-}
 
 static string GetPostgresConnectionString(IConfigurationManager config)
 {

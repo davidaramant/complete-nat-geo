@@ -1,6 +1,6 @@
 namespace Api;
 
-public sealed record DecadeSummaryDto(int Decade, string CoverImageUrl);
+public sealed record DecadeSummaryDto(int Decade, int FirstYear, int LastYear, string CoverImageUrl);
 
 public sealed record DecadeDetailDto(
 	int Decade,
@@ -8,6 +8,8 @@ public sealed record DecadeDetailDto(
 	int? NextDecade,
 	IReadOnlyList<IssueSummaryDto> Issues
 );
+
+public sealed record YearDetailDto(int Year, int? PreviousYear, int? NextYear, IReadOnlyList<IssueSummaryDto> Issues);
 
 public sealed record IssueSummaryDto(int Id, DateOnly ReleaseDate, int PageCount, string CoverImageUrl);
 

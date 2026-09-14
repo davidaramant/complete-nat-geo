@@ -18,6 +18,8 @@ sealed class IssueConfiguration : IEntityTypeConfiguration<Issue>
 			.HasComputedColumnSql("((EXTRACT(year FROM release_date)::integer / 10) * 10)", stored: true);
 
 		builder.HasIndex(issue => issue.ReleaseDate);
+		builder.HasIndex(issue => issue.Decade);
+		builder.HasIndex(issue => new { issue.Decade, issue.ReleaseDate });
 
 		builder.HasMany(issue => issue.Pages).WithOne().HasForeignKey(page => page.IssueId);
 	}
