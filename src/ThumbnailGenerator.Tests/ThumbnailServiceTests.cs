@@ -1,6 +1,3 @@
-using CompleteNatGeo.ThumbnailGenerator;
-using Shouldly;
-
 namespace CompleteNatGeo.ThumbnailGenerator.Tests;
 
 public sealed class ThumbnailServiceTests
@@ -9,8 +6,8 @@ public sealed class ThumbnailServiceTests
 		"/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAKAAoDAREAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFgEBAQEAAAAAAAAAAAAAAAAAAAYJ/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8Anu1TQ4AAD//Z"
 	);
 
-	[Fact]
-	public async Task Should_generate_thumbnails_recursively_and_overwrite_existing()
+	[Test]
+	public async Task ShouldGenerateThumbnailsRecursivelyAndOverwriteExisting()
 	{
 		var tempRoot = Path.Combine(Path.GetTempPath(), "natgeo_thumb_test_" + Guid.NewGuid());
 		try
@@ -42,22 +39,22 @@ public sealed class ThumbnailServiceTests
 			var thumb2 = Path.Combine(subDir1, "page002.thumb.webp");
 			var thumb3 = Path.Combine(subDir2, "cover image.thumb.webp");
 
-			File.Exists(thumb1).ShouldBeTrue();
-			File.Exists(thumb2).ShouldBeTrue();
-			File.Exists(thumb3).ShouldBeTrue();
+			await Assert.That(File.Exists(thumb1)).IsTrue();
+			await Assert.That(File.Exists(thumb2)).IsTrue();
+			await Assert.That(File.Exists(thumb3)).IsTrue();
 
 			// Verify old content was overwritten with valid WebP binary data
 			var thumb1Bytes = await File.ReadAllBytesAsync(thumb1);
-			thumb1Bytes.Length.ShouldBeGreaterThan(10);
+			await Assert.That(thumb1Bytes.Length).IsGreaterThan(10);
 			// WebP RIFF header check: 'R' 'I' 'F' 'F' ... 'W' 'E' 'B' 'P'
-			thumb1Bytes[0].ShouldBe((byte)'R');
-			thumb1Bytes[1].ShouldBe((byte)'I');
-			thumb1Bytes[2].ShouldBe((byte)'F');
-			thumb1Bytes[3].ShouldBe((byte)'F');
-			thumb1Bytes[8].ShouldBe((byte)'W');
-			thumb1Bytes[9].ShouldBe((byte)'E');
-			thumb1Bytes[10].ShouldBe((byte)'B');
-			thumb1Bytes[11].ShouldBe((byte)'P');
+			await Assert.That(thumb1Bytes[0]).IsEqualTo((byte)'R');
+			await Assert.That(thumb1Bytes[1]).IsEqualTo((byte)'I');
+			await Assert.That(thumb1Bytes[2]).IsEqualTo((byte)'F');
+			await Assert.That(thumb1Bytes[3]).IsEqualTo((byte)'F');
+			await Assert.That(thumb1Bytes[8]).IsEqualTo((byte)'W');
+			await Assert.That(thumb1Bytes[9]).IsEqualTo((byte)'E');
+			await Assert.That(thumb1Bytes[10]).IsEqualTo((byte)'B');
+			await Assert.That(thumb1Bytes[11]).IsEqualTo((byte)'P');
 		}
 		finally
 		{
