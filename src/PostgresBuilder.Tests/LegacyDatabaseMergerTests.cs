@@ -146,9 +146,11 @@ public sealed class LegacyDatabaseMergerTests
 			await InsertIssueAsync(basePath, 1, 200901);
 			await InsertIssueAsync(sourcePath, 2, 200901);
 
-			InvalidDataException exception = await Assert.ThrowsAsync<InvalidDataException>(() =>
-				LegacyDatabaseMerger.MergeAsync(basePath, [sourcePath], outputPath)
-			);
+			InvalidDataException exception = (
+				await Assert.ThrowsAsync<InvalidDataException>(() =>
+					LegacyDatabaseMerger.MergeAsync(basePath, [sourcePath], outputPath)
+				)
+			)!;
 
 			await Assert.That(exception.Message).Contains("200901");
 			await Assert.That(File.Exists(outputPath)).IsFalse();
@@ -173,9 +175,11 @@ public sealed class LegacyDatabaseMergerTests
 			await InsertTriviaAsync(basePath, 1);
 			await InsertTriviaAsync(sourcePath, 2);
 
-			InvalidDataException exception = await Assert.ThrowsAsync<InvalidDataException>(() =>
-				LegacyDatabaseMerger.MergeAsync(basePath, [sourcePath], outputPath)
-			);
+			InvalidDataException exception = (
+				await Assert.ThrowsAsync<InvalidDataException>(() =>
+					LegacyDatabaseMerger.MergeAsync(basePath, [sourcePath], outputPath)
+				)
+			)!;
 
 			await Assert.That(exception.Message).Contains("Trivia");
 			await Assert.That(File.Exists(outputPath)).IsFalse();
