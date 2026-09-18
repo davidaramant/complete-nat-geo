@@ -1,58 +1,59 @@
 using CompleteNatGeo.Data;
 using Microsoft.EntityFrameworkCore;
-using Shouldly;
 
 namespace CompleteNatGeo.PostgresBuilder.Tests;
 
 public sealed class CompleteNatGeoContextTests
 {
-	[Fact]
-	public void ModelConfiguration_ConfiguresIssueAndPageEntitiesCorrectly()
+	[Test]
+	public async Task ShouldConfigureIssueAndPageEntitiesCorrectly()
 	{
 		var options = new DbContextOptionsBuilder<CompleteNatGeoContext>()
 			.UseNpgsql("Host=localhost;Database=test;")
 			.Options;
 
-		using var context = new CompleteNatGeoContext(options);
+		await using var context = new CompleteNatGeoContext(options);
 		var model = context.Model;
 
 		var issueEntity = model.FindEntityType(typeof(Issue));
-		issueEntity.ShouldNotBeNull();
-		issueEntity.GetTableName().ShouldBe("issues");
-		issueEntity.GetSchema().ShouldBe("CompleteNatGeo");
+		await Assert.That(issueEntity).IsNotNull();
+		await Assert.That(issueEntity.GetTableName()).IsEqualTo("issues");
+		await Assert.That(issueEntity.GetSchema()).IsEqualTo("CompleteNatGeo");
 
 		var issuePk = issueEntity.FindPrimaryKey();
-		issuePk.ShouldNotBeNull();
-		issuePk.Properties.Select(p => p.Name).ShouldBe(["Id"]);
-		issueEntity.FindProperty(nameof(Issue.Id))?.GetColumnName().ShouldBe("id");
-		issueEntity.FindProperty(nameof(Issue.ReleaseDate))?.GetColumnName().ShouldBe("release_date");
+		await Assert.That(issuePk).IsNotNull();
+		await Assert.That(issuePk.Properties).Count().IsEqualTo(1);
+		await Assert.That(issuePk.Properties).Contains(p => p.Name == "Id");
+		await Assert.That(issueEntity.FindProperty(nameof(Issue.Id))?.GetColumnName()).IsEqualTo("id");
+		await Assert
+			.That(issueEntity.FindProperty(nameof(Issue.ReleaseDate))?.GetColumnName())
+			.IsEqualTo("release_date");
 
 		var pageEntity = model.FindEntityType(typeof(Page));
-		pageEntity.ShouldNotBeNull();
-		pageEntity.GetTableName().ShouldBe("pages");
-		pageEntity.GetSchema().ShouldBe("CompleteNatGeo");
+		await Assert.That(pageEntity).IsNotNull();
+		await Assert.That(pageEntity.GetTableName()).IsEqualTo("pages");
+		await Assert.That(pageEntity.GetSchema()).IsEqualTo("CompleteNatGeo");
 
-		var foreignKeys = pageEntity.GetForeignKeys().ToList();
-		foreignKeys.Count.ShouldBe(1);
+		await Assert.That(pageEntity.GetForeignKeys()).Count().IsEqualTo(1);
 
-		var fk = foreignKeys.Single();
-		fk.PrincipalEntityType.ClrType.ShouldBe(typeof(Issue));
-		fk.Properties.Select(p => p.Name).ShouldBe(["IssueId"]);
-		fk.PrincipalKey.Properties.Select(p => p.Name).ShouldBe(["Id"]);
+		var fk = pageEntity.GetForeignKeys().Single();
+		await Assert.That(fk.PrincipalEntityType.ClrType).IsEqualTo(typeof(Issue));
+		await Assert.That(fk.Properties).Contains(p => p.Name == "IssueId");
+		await Assert.That(fk.PrincipalKey.Properties).Contains(p => p.Name == "Id");
 
 		var pagesNavigation = issueEntity.FindNavigation(nameof(Issue.Pages));
-		pagesNavigation.ShouldNotBeNull();
-		pagesNavigation.ForeignKey.ShouldBe(fk);
+		await Assert.That(pagesNavigation).IsNotNull();
+		await Assert.That(pagesNavigation.ForeignKey).IsEqualTo(fk);
 	}
 
-	[Fact]
-	public void QueryTranslation_DecadesQueryGeneratesValidSql()
+	[Test]
+	public async Task ShouldGenerateValidSqlForDecadesQueryTranslation()
 	{
 		var options = new DbContextOptionsBuilder<CompleteNatGeoContext>()
 			.UseNpgsql("Host=localhost;Database=test;")
 			.Options;
 
-		using var context = new CompleteNatGeoContext(options);
+		await using var context = new CompleteNatGeoContext(options);
 		var query = context
 			.Issues.GroupBy(i => i.ReleaseDate.Year / 10 * 10)
 			.OrderByDescending(g => g.Key)
@@ -65,6 +66,6 @@ public sealed class CompleteNatGeoContextTests
 			});
 
 		var sql = query.ToQueryString();
-		sql.ShouldNotBeNullOrWhiteSpace();
+		await Assert.That(sql).IsNotNullOrWhiteSpace();
 	}
 }

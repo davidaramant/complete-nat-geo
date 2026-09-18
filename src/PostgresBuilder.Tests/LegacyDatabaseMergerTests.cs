@@ -4,7 +4,7 @@ namespace CompleteNatGeo.PostgresBuilder.Tests;
 
 public sealed class LegacyDatabaseMergerTests
 {
-	[Fact]
+	[Test]
 	public async Task MergeAsync_CopiesPhotoSubjectsWithoutMatchingPhotosWithNullPhotoId()
 	{
 		string directory = CreateTemporaryDirectory();
@@ -27,8 +27,10 @@ public sealed class LegacyDatabaseMergerTests
 
 			await using var output = OpenConnection(outputPath, SqliteOpenMode.ReadOnly);
 			await output.OpenAsync();
-			Assert.Equal(2, await CountAsync(output, "photo_subjects"));
-			Assert.Equal(2, await CountAsync(output, "SELECT COUNT(*) FROM photo_subjects WHERE photo_id IS NULL;"));
+			await Assert.That(await CountAsync(output, "photo_subjects")).IsEqualTo(2);
+			await Assert
+				.That(await CountAsync(output, "SELECT COUNT(*) FROM photo_subjects WHERE photo_id IS NULL;"))
+				.IsEqualTo(2);
 		}
 		finally
 		{
@@ -36,7 +38,7 @@ public sealed class LegacyDatabaseMergerTests
 		}
 	}
 
-	[Fact]
+	[Test]
 	public async Task MergeAsync_CopiesTheContentGraphAndReusesLocations()
 	{
 		string directory = CreateTemporaryDirectory();
@@ -58,40 +60,42 @@ public sealed class LegacyDatabaseMergerTests
 			await using (var output = OpenConnection(outputPath, SqliteOpenMode.ReadOnly))
 			{
 				await output.OpenAsync();
-				Assert.Equal(3, await CountAsync(output, "issues"));
-				Assert.Equal(1, await CountAsync(output, "locations"));
-				Assert.Equal(1, await CountAsync(output, "ads"));
-				Assert.Equal(1, await CountAsync(output, "articles"));
-				Assert.Equal(1, await CountAsync(output, "departments"));
-				Assert.Equal(1, await CountAsync(output, "maps"));
-				Assert.Equal(3, await CountAsync(output, "contributors"));
-				Assert.Equal(3, await CountAsync(output, "geolinks"));
-				Assert.Equal(3, await CountAsync(output, "links"));
-				Assert.Equal(3, await CountAsync(output, "photos"));
-				Assert.Equal(3, await CountAsync(output, "photo_subjects"));
-				Assert.Equal(1, await CountAsync(output, "trivia_questions"));
-				Assert.Equal(1, await CountAsync(output, "trivia_rankings"));
-				Assert.Equal(
-					3,
-					await CountAsync(
-						output,
-						"SELECT COUNT(*) FROM photo_subjects AS subject JOIN photos AS photo ON photo.id = subject.photo_id;"
+				await Assert.That(await CountAsync(output, "issues")).IsEqualTo(3);
+				await Assert.That(await CountAsync(output, "locations")).IsEqualTo(1);
+				await Assert.That(await CountAsync(output, "ads")).IsEqualTo(1);
+				await Assert.That(await CountAsync(output, "articles")).IsEqualTo(1);
+				await Assert.That(await CountAsync(output, "departments")).IsEqualTo(1);
+				await Assert.That(await CountAsync(output, "maps")).IsEqualTo(1);
+				await Assert.That(await CountAsync(output, "contributors")).IsEqualTo(3);
+				await Assert.That(await CountAsync(output, "geolinks")).IsEqualTo(3);
+				await Assert.That(await CountAsync(output, "links")).IsEqualTo(3);
+				await Assert.That(await CountAsync(output, "photos")).IsEqualTo(3);
+				await Assert.That(await CountAsync(output, "photo_subjects")).IsEqualTo(3);
+				await Assert.That(await CountAsync(output, "trivia_questions")).IsEqualTo(1);
+				await Assert.That(await CountAsync(output, "trivia_rankings")).IsEqualTo(1);
+				await Assert
+					.That(
+						await CountAsync(
+							output,
+							"SELECT COUNT(*) FROM photo_subjects AS subject JOIN photos AS photo ON photo.id = subject.photo_id;"
+						)
 					)
-				);
-				Assert.Equal(
-					0,
-					await CountAsync(
-						output,
-						"SELECT COUNT(*) FROM pragma_table_info('photos') WHERE name = 'src_photo_id';"
+					.IsEqualTo(3);
+				await Assert
+					.That(
+						await CountAsync(
+							output,
+							"SELECT COUNT(*) FROM pragma_table_info('photos') WHERE name = 'src_photo_id';"
+						)
 					)
-				);
+					.IsEqualTo(0);
 			}
 
 			await using (var source = OpenConnection(sourcePath, SqliteOpenMode.ReadOnly))
 			{
 				await source.OpenAsync();
-				Assert.Equal(1, await CountAsync(source, "issues"));
-				Assert.Equal(3, await CountAsync(source, "photos"));
+				await Assert.That(await CountAsync(source, "issues")).IsEqualTo(1);
+				await Assert.That(await CountAsync(source, "photos")).IsEqualTo(3);
 			}
 		}
 		finally
@@ -100,7 +104,7 @@ public sealed class LegacyDatabaseMergerTests
 		}
 	}
 
-	[Fact]
+	[Test]
 	public async Task MergeAsync_CopiesTriviaFromTheOnlyTriviaBearingSource()
 	{
 		string directory = CreateTemporaryDirectory();
@@ -118,8 +122,8 @@ public sealed class LegacyDatabaseMergerTests
 			await using (var output = OpenConnection(outputPath, SqliteOpenMode.ReadOnly))
 			{
 				await output.OpenAsync();
-				Assert.Equal(1, await CountAsync(output, "trivia_questions"));
-				Assert.Equal(1, await CountAsync(output, "trivia_rankings"));
+				await Assert.That(await CountAsync(output, "trivia_questions")).IsEqualTo(1);
+				await Assert.That(await CountAsync(output, "trivia_rankings")).IsEqualTo(1);
 			}
 		}
 		finally
@@ -128,7 +132,7 @@ public sealed class LegacyDatabaseMergerTests
 		}
 	}
 
-	[Fact]
+	[Test]
 	public async Task MergeAsync_RejectsDuplicateIssuesWithoutCreatingOutput()
 	{
 		string directory = CreateTemporaryDirectory();
@@ -146,8 +150,8 @@ public sealed class LegacyDatabaseMergerTests
 				LegacyDatabaseMerger.MergeAsync(basePath, [sourcePath], outputPath)
 			);
 
-			Assert.Contains("200901", exception.Message, StringComparison.Ordinal);
-			Assert.False(File.Exists(outputPath));
+			await Assert.That(exception.Message).Contains("200901");
+			await Assert.That(File.Exists(outputPath)).IsFalse();
 		}
 		finally
 		{
@@ -155,7 +159,7 @@ public sealed class LegacyDatabaseMergerTests
 		}
 	}
 
-	[Fact]
+	[Test]
 	public async Task MergeAsync_RejectsTriviaInMoreThanOneDatabaseWithoutCreatingOutput()
 	{
 		string directory = CreateTemporaryDirectory();
@@ -173,8 +177,8 @@ public sealed class LegacyDatabaseMergerTests
 				LegacyDatabaseMerger.MergeAsync(basePath, [sourcePath], outputPath)
 			);
 
-			Assert.Contains("Trivia", exception.Message, StringComparison.Ordinal);
-			Assert.False(File.Exists(outputPath));
+			await Assert.That(exception.Message).Contains("Trivia");
+			await Assert.That(File.Exists(outputPath)).IsFalse();
 		}
 		finally
 		{
