@@ -7,6 +7,7 @@
 * Avoiding the standard Safari chrome is desired. With iPadOS, this seems best achieved with a PWA.
 * The app is only intended to be used in a local network environment. The API will only be available inside of the network.
 * There is no need for offline support.
+* An OpenAPI spec of the API is located here: src/Api/Api.json
 
 ## Main Functional Areas
 

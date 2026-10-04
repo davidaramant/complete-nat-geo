@@ -52,8 +52,7 @@ api.MapGet(
 		async (CompleteNatGeoContext context, IImageContext imageContext) =>
 		{
 			var decades = await context
-				.Issues
-				.GroupBy(i => i.Decade)
+				.Issues.GroupBy(i => i.Decade)
 				.OrderByDescending(g => g.Key)
 				.Select(g => new
 				{
@@ -61,8 +60,7 @@ api.MapGet(
 					FirstYear = g.Min(i => i.ReleaseDate.Year),
 					LastYear = g.Max(i => i.ReleaseDate.Year),
 					FirstReleaseDate = g.Min(i => i.ReleaseDate),
-					CoverFileName = g
-						.OrderBy(i => i.ReleaseDate)
+					CoverFileName = g.OrderBy(i => i.ReleaseDate)
 						.Select(i => i.Pages.Where(p => p.SortOrder == 0).Select(p => p.FileName).First())
 						.First(),
 				})
@@ -76,7 +74,8 @@ api.MapGet(
 			));
 		}
 	)
-	.WithName("GetDecades");
+	.WithName("GetDecades")
+	.Produces<IEnumerable<DecadeSummaryDto>>();
 
 api.MapGet(
 		"/decades/{decade:int}",
@@ -104,10 +103,7 @@ api.MapGet(
 				.Select(i => (int?)i.Decade)
 				.MaxAsync();
 
-			var nextDecade = await context
-				.Issues.Where(i => i.Decade > decade)
-				.Select(i => (int?)i.Decade)
-				.MinAsync();
+			var nextDecade = await context.Issues.Where(i => i.Decade > decade).Select(i => (int?)i.Decade).MinAsync();
 
 			return Results.Ok(
 				new DecadeDetailDto(
@@ -126,7 +122,8 @@ api.MapGet(
 			);
 		}
 	)
-	.WithName("GetDecade");
+	.WithName("GetDecade")
+	.Produces<DecadeDetailDto>();
 
 api.MapGet(
 		"/years/{year:int}",
@@ -176,7 +173,8 @@ api.MapGet(
 			);
 		}
 	)
-	.WithName("GetYear");
+	.WithName("GetYear")
+	.Produces<YearDetailDto>();
 
 api.MapGet(
 		"/issues/{id:int}",
@@ -240,29 +238,31 @@ api.MapGet(
 			);
 		}
 	)
-	.WithName("GetIssue");
+	.WithName("GetIssue")
+	.Produces<IssueDetailDto>();
 
 api.MapGet(
 		"/pages/{id:int}",
 		async (CompleteNatGeoContext context, IImageContext imageContext, [FromRoute] int id) =>
 		{
 			var page = await context
-				.Pages
-				.Where(p => p.Id == id)
+				.Pages.Where(p => p.Id == id)
 				.Join(
 					context.Issues,
 					page => page.IssueId,
 					issue => issue.Id,
-					(page, issue) => new
-					{
-						page.Id,
-						page.IssueId,
-						page.SortOrder,
-						page.PageNumber,
-						page.FileName,
-						issue.ReleaseDate,
-		            				issue.Decade,
-					})
+					(page, issue) =>
+						new
+						{
+							page.Id,
+							page.IssueId,
+							page.SortOrder,
+							page.PageNumber,
+							page.FileName,
+							issue.ReleaseDate,
+							issue.Decade,
+						}
+				)
 				.SingleOrDefaultAsync();
 
 			if (page is null)
@@ -294,9 +294,11 @@ api.MapGet(
 			);
 		}
 	)
-	.WithName("GetPage");
+	.WithName("GetPage")
+	.Produces<PageDetailDto>();
 
 app.Run();
+return;
 
 static string GetPostgresConnectionString(IConfigurationManager config)
 {
