@@ -7,17 +7,16 @@
 * Avoiding the standard Safari chrome is desired. With iPadOS, this seems best achieved with a PWA.
 * The app is only intended to be used in a local network environment. The API will only be available inside of the network.
 * There is no need for offline support.
-* An OpenAPI spec of the API is located here: src/Api/Api.json
+* An OpenAPI spec of the API is located here: `/src/Api/Api.json`
 
 ## Main Functional Areas
 
-The app should present a homepage when loaded where the different functional areas of the app can be chosen.
+The app should present a homepage where the different functional areas of the app can be chosen.
 
 ### Global UI Requirements
 
 A bar running across the top of the screen is desired. This would house breadcrumbs, current page context, etc. 
-* At the top left should be a Home button/link/control that takes the user back to the homepage (this will probably the root of the breadcrumbs). 
-* At the top right will be forward and backward buttons. Nearly every page of the application supports navigating forwards and backwards. When navigation is supported both buttons must be shown even if one direction is disabled.
+* At the top left should be a Home control that takes the user back to the homepage (this will be the root of the breadcrumbs). 
 
 ### Browse by Decades
 
@@ -70,6 +69,9 @@ Navigation: Next/Previous issue (supplied by API)
 #### Page
 Displays the full quality image for a page.
 The image should be proportionally scaled to fit inside of the available space (IE it should not scroll by default).
+In Page view, the UI chrome of the application can be hidden.
+On an iPad, it should support swiping left and right to navigate pages.
+On an iPad, it should support zooming into a page using touch gestures.
 
 Example Breadcrumbs: Home > Decades > 1980s > 1985 > March 1 > 124 (Page 23)
 API call: `/api/v1/pages/{page id}/`
